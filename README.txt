@@ -27,6 +27,6 @@ Makes it easy to list and merge GitHub pull requests.
     $ git pulls browse 1
     > go to web page (mac only)
 
-    $ git pulls pull 1
+    $ git pulls merge 1
     > merge pull request #1
 
