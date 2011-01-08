@@ -34,12 +34,21 @@ class GitPulls
 
   def merge
     num = @args.shift
+    option = @args.shift
     if p = pull_num(num)
       o = p['head']['repository']['owner']
       r = p['head']['repository']['name']
       s = p['head']['sha']
-      msg = "Merge pull request ##{num} from #{o}/#{r}"
-      puts cmd = "git merge --no-ff -m '#{msg}' #{s}"
+
+      message = "Merge pull request ##{num} from #{o}/#{r}\n\n---\n\n"
+      message += p['body'].gsub("'", '')
+      cmd = ''
+      if option == '--log'
+        message += "\n\n---\n\nMerge Log:\n"
+        puts cmd = "git merge --no-ff --log -m '#{message}' #{s}"
+      else
+        puts cmd = "git merge --no-ff -m '#{message}' #{s}"
+      end
       exec(cmd)
     else
       puts "No such number"
