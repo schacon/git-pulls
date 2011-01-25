@@ -30,3 +30,11 @@ Makes it easy to list and merge GitHub pull requests.
     $ git pulls merge 1
     > merge pull request #1
 
+Installation
+===============
+
+Simply install it via Rubygems:
+
+    gem install git-pulls
+
+(Prefix with `sudo` if necessary)
