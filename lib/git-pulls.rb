@@ -158,6 +158,7 @@ Usage: git pulls update
       end
     end
     repos.each do |repo, bool|
+      puts "  fetching #{repo}"
       git("fetch #{protocol(is_private)}@github.com/#{repo}.git refs/heads/*:refs/pr/#{repo}/*")
     end
   end
