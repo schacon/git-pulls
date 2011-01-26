@@ -20,6 +20,8 @@ class GitPulls
   def run
     if @command && self.respond_to?(@command)
       self.send @command
+    elsif %w(-h --help).include?(@command)
+      usage
     else
       help
     end
@@ -30,6 +32,17 @@ class GitPulls
   def help
     puts "No command: #{@command}"
     puts "Try: update, list, show, merge, browse"
+    puts "or call with '--help' for usage information"
+  end
+
+  def usage
+    puts <<-USAGE
+Usage: git pulls update
+   or: git pulls list [--reverse]
+   or: git pulls show <number> [--full]
+   or: git pulls browse <number>
+   or: git pulls merge <number>
+    USAGE
   end
 
   def merge
