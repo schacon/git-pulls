@@ -19,6 +19,11 @@ class GitPulls
 
   def run
     if @command && self.respond_to?(@command)
+      # If the cache file doesn't exist, make sure we run update
+      # before any other command. git-pulls will otherwise crash
+      # with an exception.
+      update unless File.exists?(PULLS_CACHE_FILE) || @command == 'update'
+
       self.send @command
     elsif %w(-h --help).include?(@command)
       usage
