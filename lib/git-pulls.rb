@@ -135,10 +135,18 @@ Usage: git pulls update
     fetch_stale_forks
     list
   end
+  
+  def protocol(is_private)
+    "git://"
+    if is_private
+      "ssh://git"
+    end
+  end
 
   def fetch_stale_forks
     puts "Checking for forks in need of fetching"
     pulls = get_pull_info
+    is_private = get_repo_visibility
     repos = {}
     pulls.each do |pull|
       o = pull['head']['repository']['owner']
@@ -150,8 +158,7 @@ Usage: git pulls update
       end
     end
     repos.each do |repo, bool|
-      puts "  fetching #{repo}"
-      git("fetch git://github.com/#{repo}.git refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{protocol(is_private)}@github.com/#{repo}.git refs/heads/*:refs/pr/#{repo}/*")
     end
   end
 
@@ -180,15 +187,40 @@ Usage: git pulls update
     info.to_s.gsub("\n", ' ')
   end
 
+
+  # PRIVATE REPOSITORIES ACCESS
+  
+  def github_username
+    git("config --get-all github.user")
+  end
+  
+  def github_token
+    git("config --get-all github.token")
+  end
+
   # API/DATA HELPER FUNCTIONS #
+ 
+  def authentication_options
+    options = {}
+    
+    unless github_token.empty? && github_username.empty?
+      options = {:basic_auth => {:username => "#{github_username}/token:#{github_token}"}}
+    end
+  end
  
   def get_pull_info
     get_data(PULLS_CACHE_FILE)['pulls']
   end
 
+  def get_repo_visibility
+    repo_path = "/repos/show/#{repo_info[0]}/#{repo_info[1]}"
+    repo_response = HTTParty.get('https://github.com/api/v2/json' << repo_path, authentication_options)
+    repo_response['repository']['private']
+  end
+
   def cache_pull_info
     path = "/pulls/#{@user}/#{@repo}/open"
-    response = HTTParty.get('https://github.com/api/v2/json' << path)
+    response = HTTParty.get('https://github.com/api/v2/json' << path, authentication_options)
     save_data(response, PULLS_CACHE_FILE)
   end
 

@@ -29,6 +29,17 @@ Makes it easy to list and merge GitHub pull requests.
 
     $ git pulls merge 1
     > merge pull request #1
+    
+Private repositories
+----------------
+
+To manage pull requests for your private repositories you have set up your git config for github 
+
+    $ git config --global github.user your_gitubusername
+    $ git config --global github.token your_githubtoken123456789
+    
+You can find your API token on the [account](https://github.com/account) page.
+
 
 Installation
 ===============
