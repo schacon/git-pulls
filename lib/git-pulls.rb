@@ -137,10 +137,7 @@ Usage: git pulls update
   end
   
   def protocol(is_private)
-    "git://"
-    if is_private
-      "ssh://git"
-    end
+    is_private ? "ssh://git" : "git://"
   end
 
   def fetch_stale_forks
