@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency     'json'
   s.add_runtime_dependency     'httparty'
+  s.add_runtime_dependency     'launchy'
 
   s.description       = <<desc
   git-pulls facilitates github pull requests.

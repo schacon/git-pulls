@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'json'
 require 'httparty'
+require 'launchy'
 require 'pp'
 
 class GitPulls
@@ -104,7 +105,7 @@ Usage: git pulls update
   def browse
     num = @args.shift
     if p = pull_num(num)
-      `open #{p['html_url']}`
+      Launchy.open(p['html_url'])
     else
       puts "No such number"
     end
