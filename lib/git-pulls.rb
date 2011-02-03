@@ -151,7 +151,7 @@ Usage: git pulls update
     end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch git://github.com/#{repo}.git refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch git://github.com/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
     end
   end
 
