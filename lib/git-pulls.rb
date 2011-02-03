@@ -157,7 +157,16 @@ Usage: git pulls update
     end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch #{protocol(is_private)}github.com/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{protocol(is_private)}#{github_url}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+    end
+  end
+
+  def github_url
+    host = git("config --get-all github.host")
+    if host.size > 0
+      host
+    else
+      'github.com'
     end
   end
 
@@ -221,14 +230,15 @@ Usage: git pulls update
     # This would fail if the repository was private and user did not provide github token
     if github_credentials_provided?
       repo_path = "/repos/show/#{repo_info[0]}/#{repo_info[1]}"
-      repo_response = HTTParty.get('https://github.com/api/v2/json' << repo_path, authentication_options)
+      repo_response = HTTParty.get("https://#{github_url}/api/v2/json" << repo_path, authentication_options)
       repo_response['repository']['private'] if repo_response['repository']
     end
   end
 
   def cache_pull_info
     path = "/pulls/#{@user}/#{@repo}/open"
-    response = HTTParty.get('https://github.com/api/v2/json' << path, authentication_options)
+    puts "https://#{github_url}/api/v2/json"
+    response = HTTParty.get("https://#{github_url}/api/v2/json" << path, authentication_options)
     save_data(response, PULLS_CACHE_FILE)
   end
 

@@ -40,6 +40,13 @@ To manage pull requests for your private repositories you have set up your git c
     
 You can find your API token on the [account](https://github.com/account) page.
 
+Using git-pulls with GitHub Enterprise
+--------------------------------------
+
+If you want to use the git-pulls script with a private GitHub install, set the
+github.host config value to your internal host.
+
+    $ git config --global github.host github.mycompany.com
 
 Installation
 ===============
