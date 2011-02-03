@@ -136,10 +136,15 @@ Usage: git pulls update
     fetch_stale_forks
     list
   end
+  
+  def protocol(is_private)
+    is_private ? "ssh://git@" : "git://"
+  end
 
   def fetch_stale_forks
     puts "Checking for forks in need of fetching"
     pulls = get_pull_info
+    is_private = get_repo_visibility
     repos = {}
     pulls.each do |pull|
       o = pull['head']['repository']['owner']
@@ -152,7 +157,7 @@ Usage: git pulls update
     end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch git://github.com/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{protocol(is_private)}github.com/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
     end
   end
 
@@ -181,15 +186,49 @@ Usage: git pulls update
     info.to_s.gsub("\n", ' ')
   end
 
+
+  # PRIVATE REPOSITORIES ACCESS
+  
+  def github_username
+    git("config --get-all github.user")
+  end
+  
+  def github_token
+    git("config --get-all github.token")
+  end
+
   # API/DATA HELPER FUNCTIONS #
+  
+  def github_credentials_provided?
+    if github_token.empty? && github_username.empty?
+      return false
+    end
+    true
+  end
+ 
+  def authentication_options    
+    if github_credentials_provided?
+      options = {:basic_auth => {:username => "#{github_username}/token:#{github_token}"}}
+    end
+    options || {}
+  end
  
   def get_pull_info
     get_data(PULLS_CACHE_FILE)['pulls']
   end
 
+  def get_repo_visibility
+    # This would fail if the repository was private and user did not provide github token
+    if github_credentials_provided?
+      repo_path = "/repos/show/#{repo_info[0]}/#{repo_info[1]}"
+      repo_response = HTTParty.get('https://github.com/api/v2/json' << repo_path, authentication_options)
+      repo_response['repository']['private'] if repo_response['repository']
+    end
+  end
+
   def cache_pull_info
     path = "/pulls/#{@user}/#{@repo}/open"
-    response = HTTParty.get('https://github.com/api/v2/json' << path)
+    response = HTTParty.get('https://github.com/api/v2/json' << path, authentication_options)
     save_data(response, PULLS_CACHE_FILE)
   end
 
