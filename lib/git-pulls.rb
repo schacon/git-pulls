@@ -116,6 +116,7 @@ Usage: git pulls update
     puts "Open Pull Requests for #{@user}/#{@repo}" 
     pulls = get_pull_info
     pulls.reverse! if option == '--reverse'
+    count = 0
     pulls.each do |pull|
       line = []
       line << l(pull['number'], 4)
@@ -126,7 +127,11 @@ Usage: git pulls update
       sha = pull['head']['sha']
       if not_merged?(sha)
         puts line.join ' '
+        count += 1
       end
+    end
+    if count == 0
+      puts ' -- no open pull requests --'
     end
   end
 
