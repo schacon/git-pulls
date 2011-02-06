@@ -1,6 +1,6 @@
 require 'json'
-require 'httparty'
 require 'launchy'
+require 'octokit'
 
 class GitPulls
 
@@ -17,6 +17,7 @@ class GitPulls
   end
 
   def run
+    configure
     if @command && self.respond_to?(@command)
       # If the cache file doesn't exist, make sure we run update
       # before any other command. git-pulls will otherwise crash
@@ -164,6 +165,13 @@ Usage: git pulls update
     end
   end
 
+  def get_repo_visibility
+    # This would fail if the repository was private and user did not provide github token
+    if github_credentials_provided?
+      Octokit.repository("#{repo_info[0]}/#{repo_info[1]}").private
+    end
+  end
+
   def github_url
     host = git("config --get-all github.host")
     if host.size > 0
@@ -201,7 +209,14 @@ Usage: git pulls update
 
   # PRIVATE REPOSITORIES ACCESS
 
-  def github_username
+  def configure
+    Octokit.configure do |config|
+      config.login = github_login
+      config.token = github_token
+    end
+  end
+
+  def github_login
     git("config --get-all github.user")
   end
 
@@ -212,41 +227,23 @@ Usage: git pulls update
   # API/DATA HELPER FUNCTIONS #
 
   def github_credentials_provided?
-    if github_token.empty? && github_username.empty?
+    if github_token.empty? && github_login.empty?
       return false
     end
     true
-  end
-
-  def authentication_options
-    if github_credentials_provided?
-      options = {:basic_auth => {:username => "#{github_username}/token:#{github_token}"}}
-    end
-    options || {}
   end
 
   def get_pull_info
     get_data(PULLS_CACHE_FILE)['pulls']
   end
 
-  def get_repo_visibility
-    # This would fail if the repository was private and user did not provide github token
-    if github_credentials_provided?
-      repo_path = "/repos/show/#{repo_info[0]}/#{repo_info[1]}"
-      repo_response = HTTParty.get("https://#{github_url}/api/v2/json" << repo_path, authentication_options)
-      repo_response['repository']['private'] if repo_response['repository']
-    end
+  def get_data(file)
+    data = JSON.parse(File.read(file))
   end
 
   def cache_pull_info
-    path = "/pulls/#{@user}/#{@repo}/open"
-    puts "https://#{github_url}/api/v2/json"
-    response = HTTParty.get("https://#{github_url}/api/v2/json" << path, authentication_options)
-    save_data(response, PULLS_CACHE_FILE)
-  end
-
-  def get_data(file)
-    data = JSON.parse(File.read(file))
+    response = Octokit.pull_requests("#{@user}/#{@repo}")
+    save_data({'pulls' => response}, PULLS_CACHE_FILE)
   end
 
   def save_data(data, file)
@@ -259,7 +256,6 @@ Usage: git pulls update
     data = get_pull_info
     data.select { |p| p['number'].to_s == num.to_s }.first
   end
-
 
   def repo_info
     c = {}
