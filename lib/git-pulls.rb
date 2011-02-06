@@ -1,7 +1,6 @@
 require 'json'
 require 'httparty'
 require 'launchy'
-require 'pp'
 
 class GitPulls
 
