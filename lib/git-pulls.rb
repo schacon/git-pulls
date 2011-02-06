@@ -141,14 +141,9 @@ Usage: git pulls update
     list
   end
 
-  def protocol(is_private)
-    is_private ? "ssh://git@" : "git://"
-  end
-
   def fetch_stale_forks
     puts "Checking for forks in need of fetching"
     pulls = get_pull_info
-    is_private = get_repo_visibility
     repos = {}
     pulls.each do |pull|
       o = pull['head']['repository']['owner']
@@ -161,23 +156,18 @@ Usage: git pulls update
     end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch #{protocol(is_private)}#{github_url}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{protocol(get_repo_visibility)}#{github_url}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
     end
+  end
+
+  def protocol(is_private)
+    is_private ? "ssh://git@" : "git://"
   end
 
   def get_repo_visibility
     # This would fail if the repository was private and user did not provide github token
     if github_credentials_provided?
       Octokit.repository("#{repo_info[0]}/#{repo_info[1]}").private
-    end
-  end
-
-  def github_url
-    host = git("config --get-all github.host")
-    if host.size > 0
-      host
-    else
-      'github.com'
     end
   end
 
@@ -190,7 +180,6 @@ Usage: git pulls update
     commits = git("rev-list #{sha} ^HEAD 2>&1")
     commits.split("\n").size > 0
   end
-
 
   # DISPLAY HELPER FUNCTIONS #
 
@@ -206,13 +195,13 @@ Usage: git pulls update
     info.to_s.gsub("\n", ' ')
   end
 
-
   # PRIVATE REPOSITORIES ACCESS
 
   def configure
     Octokit.configure do |config|
       config.login = github_login
       config.token = github_token
+      config.endpoint = github_endpoint
     end
   end
 
@@ -222,6 +211,15 @@ Usage: git pulls update
 
   def github_token
     git("config --get-all github.token")
+  end
+
+  def github_endpoint
+    host = git("config --get-all github.host")
+    if host.size > 0
+      host
+    else
+      'https://github.com/'
+    end
   end
 
   # API/DATA HELPER FUNCTIONS #
