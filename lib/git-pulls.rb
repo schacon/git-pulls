@@ -32,7 +32,7 @@ class GitPulls
   end
 
   ## COMMANDS ##
- 
+
   def help
     puts "No command: #{@command}"
     puts "Try: update, list, show, merge, browse"
@@ -111,7 +111,7 @@ Usage: git pulls update
 
   def list
     option = @args.shift
-    puts "Open Pull Requests for #{@user}/#{@repo}" 
+    puts "Open Pull Requests for #{@user}/#{@repo}"
     pulls = get_pull_info
     pulls.reverse! if option == '--reverse'
     count = 0
@@ -134,12 +134,12 @@ Usage: git pulls update
   end
 
   def update
-    puts "Updating #{@user}/#{@repo}" 
+    puts "Updating #{@user}/#{@repo}"
     cache_pull_info
     fetch_stale_forks
     list
   end
-  
+
   def protocol(is_private)
     is_private ? "ssh://git@" : "git://"
   end
@@ -200,31 +200,31 @@ Usage: git pulls update
 
 
   # PRIVATE REPOSITORIES ACCESS
-  
+
   def github_username
     git("config --get-all github.user")
   end
-  
+
   def github_token
     git("config --get-all github.token")
   end
 
   # API/DATA HELPER FUNCTIONS #
-  
+
   def github_credentials_provided?
     if github_token.empty? && github_username.empty?
       return false
     end
     true
   end
- 
-  def authentication_options    
+
+  def authentication_options
     if github_credentials_provided?
       options = {:basic_auth => {:username => "#{github_username}/token:#{github_token}"}}
     end
     options || {}
   end
- 
+
   def get_pull_info
     get_data(PULLS_CACHE_FILE)['pulls']
   end
@@ -264,7 +264,7 @@ Usage: git pulls update
   def repo_info
     c = {}
     config = git('config --list')
-    config.split("\n").each do |line| 
+    config.split("\n").each do |line|
       k, v = line.split('=')
       c[k] = v
     end
