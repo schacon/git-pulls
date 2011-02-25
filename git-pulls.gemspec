@@ -2,7 +2,7 @@ $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
   s.name     = "git-pulls"
-  s.version  = "0.3.0"
+  s.version  = "0.3.1"
   s.date     = Time.now.strftime('%Y-%m-%d')
   s.summary  = "facilitates github pull requests"
   s.homepage = "http://github.com/schacon/git-pulls"
