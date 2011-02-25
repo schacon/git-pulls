@@ -156,12 +156,8 @@ Usage: git pulls update
     end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch #{protocol(get_repo_visibility)}#{github_endpoint}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{github_endpoint}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
     end
-  end
-
-  def protocol(is_private)
-    is_private ? "ssh://git@" : "git://"
   end
 
   def get_repo_visibility
@@ -218,7 +214,7 @@ Usage: git pulls update
     if host.size > 0
       host
     else
-      'https://github.com/'
+      'https://github.com'
     end
   end
 
