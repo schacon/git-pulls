@@ -161,13 +161,6 @@ Usage: git pulls update
     end
   end
 
-  def get_repo_visibility
-    # This would fail if the repository was private and user did not provide github token
-    if github_credentials_provided?
-      Octokit.repository("#{repo_info[0]}/#{repo_info[1]}").private
-    end
-  end
-
   def has_sha(sha)
     git("show #{sha} 2>&1")
     $?.exitstatus == 0
