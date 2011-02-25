@@ -146,6 +146,7 @@ Usage: git pulls update
     pulls = get_pull_info
     repos = {}
     pulls.each do |pull|
+      next if pull['head']['repository'].nil? # Fork has been deleted
       o = pull['head']['repository']['owner']
       r = pull['head']['repository']['name']
       s = pull['head']['sha']
