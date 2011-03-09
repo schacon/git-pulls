@@ -253,9 +253,10 @@ Usage: git pulls update
       c[k] = v
     end
     u = c['remote.origin.url']
-    if m = /github\.com.(.*?)\/(.*)\.git/.match(u)
+    if m = /github\.com.(.*?)\/(.*)(\.git)?/.match(u)
       user = m[1]
       proj = m[2]
+      proj = proj[0..-5] if proj =~ /\.git$/
     end
     [user, proj]
   end
