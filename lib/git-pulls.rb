@@ -54,8 +54,20 @@ Usage: git pulls update
     num = @args.shift
     option = @args.shift
     if p = pull_num(num)
-      o = p['head']['repository']['owner']
-      r = p['head']['repository']['name']
+      if p['head']['repository']
+        o = p['head']['repository']['owner']
+        r = p['head']['repository']['name']
+      else # they deleted the source repo
+        o = p['head']['user']['login']
+        purl = p['patch_url']
+        puts "Sorry, #{o} deleted the source repository, git-pulls doesn't support this."
+        puts "You can manually patch your repo by running:"
+        puts
+        puts "  curl #{purl} | git am"
+        puts
+        puts "Tell the contributor not to do this."
+        return false
+      end
       s = p['head']['sha']
 
       message = "Merge pull request ##{num} from #{o}/#{r}\n\n---\n\n"
