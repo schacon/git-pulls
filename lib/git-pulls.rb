@@ -257,6 +257,24 @@ Usage: git pulls update
     data.select { |p| p['number'].to_s == num.to_s }.first
   end
 
+  def github_insteadof_matching(c, u)
+    first = c.collect {|k,v| [v, /url\.(.*github\.com.*)\.insteadof/.match(k)]}.
+              find {|v,m| u.index(v) and m != nil}
+    if first
+      return first[0], first[1][1]
+    end
+    return nil, nil
+  end
+
+  def github_user_and_proj(u)
+    # Trouble getting optional ".git" at end to work, so put that logic below
+    m = /github\.com.(.*?)\/(.*)/.match(u)
+    if m
+      return m[1], m[2].sub(/\.git\Z/, "")
+    end
+    return nil, nil
+  end
+
   def repo_info
     c = {}
     config = git('config --list')
@@ -265,9 +283,14 @@ Usage: git pulls update
       c[k] = v
     end
     u = c['remote.origin.url']
-    if m = /github\.com.(.*?)\/(.*)\.git/.match(u)
-      user = m[1]
-      proj = m[2]
+
+    user, proj = github_user_and_proj(u)
+    if !(user and proj):
+      short, base = github_insteadof_matching(c, u)
+      if short and base
+        u = u.sub(short, base)
+        user, proj = github_user_and_proj(u)
+      end
     end
     [user, proj]
   end
