@@ -8,7 +8,6 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/schacon/git-pulls"
   s.email    = "schacon@gmail.com"
   s.authors  = ["Scott Chacon"]
-  s.has_rdoc = false
 
   s.files    = %w( LICENSE )
   s.files    += Dir.glob("lib/**/*")
