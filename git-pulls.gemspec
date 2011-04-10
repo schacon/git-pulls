@@ -2,7 +2,7 @@ $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
   s.name     = "git-pulls"
-  s.version  = "0.3.2"
+  s.version  = "0.3.3"
   s.date     = Time.now.strftime('%Y-%m-%d')
   s.summary  = "facilitates github pull requests"
   s.homepage = "http://github.com/schacon/git-pulls"
@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'launchy'
-  s.add_runtime_dependency 'octokit'
+  s.add_runtime_dependency 'octokit', "= 0.5.1"
 end
