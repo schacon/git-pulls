@@ -37,7 +37,7 @@ class GitPulls
   def help
     puts "No command: #{@command}"
     puts "Try: update, list, show, merge, browse"
-    puts "or call with '--help' for usage information"
+    puts "or call with '-h' for usage information"
   end
 
   def usage
