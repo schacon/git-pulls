@@ -285,7 +285,7 @@ Usage: git pulls update
     u = c['remote.origin.url']
 
     user, proj = github_user_and_proj(u)
-    if !(user and proj):
+    if !(user and proj)
       short, base = github_insteadof_matching(c, u)
       if short and base
         u = u.sub(short, base)
