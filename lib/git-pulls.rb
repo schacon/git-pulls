@@ -167,7 +167,7 @@ Usage: git pulls update
         repos[repo] = true
       end
     end
-    if github_token
+    if github_credentials_provided?
       endpoint = "git@github.com:"
     else
       endpoint = github_endpoint + "/"
