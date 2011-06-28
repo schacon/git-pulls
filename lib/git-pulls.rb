@@ -167,9 +167,14 @@ Usage: git pulls update
         repos[repo] = true
       end
     end
+    if github_token
+      endpoint = "git@github.com:"
+    else
+      endpoint = github_endpoint + "/"
+    end
     repos.each do |repo, bool|
       puts "  fetching #{repo}"
-      git("fetch #{github_endpoint}/#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
+      git("fetch #{endpoint}#{repo}.git +refs/heads/*:refs/pr/#{repo}/*")
     end
   end
 
