@@ -1,5 +1,5 @@
 git-pulls
-==============
+=========
 
 Makes it easy to list and merge GitHub pull requests.
 
@@ -30,8 +30,14 @@ Makes it easy to list and merge GitHub pull requests.
     $ git pulls merge 1
     > merge pull request #1
     
+Requirements
+------------
+
+`git-pulls` assumes you're using an 'origin' remote.  If you are not, simply add an 'origin' 
+remote that points to the GitHub repository you want to check for pull requests.
+
 Private repositories
-----------------
+--------------------
 
 To manage pull requests for your private repositories you have set up your git config for github 
 
@@ -49,7 +55,7 @@ github.host config value to your internal host.
     $ git config --global github.host github.mycompany.com
 
 Installation
-===============
+============
 
 Simply install it via Rubygems:
 
