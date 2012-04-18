@@ -204,6 +204,7 @@ Usage: git pulls update
       config.login = github_login
       config.token = github_token
       config.endpoint = github_endpoint
+      config.proxy = http_proxy
     end
   end
 
@@ -222,6 +223,10 @@ Usage: git pulls update
     else
       'https://github.com'
     end
+  end
+
+  def http_proxy
+    git("config --get-all http.proxy")
   end
 
   # API/DATA HELPER FUNCTIONS #
