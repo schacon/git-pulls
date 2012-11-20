@@ -18,5 +18,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'launchy'
-  s.add_runtime_dependency 'octokit', "= 0.5.1"
+  s.add_runtime_dependency 'octokit'
 end
