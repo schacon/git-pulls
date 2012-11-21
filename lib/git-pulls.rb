@@ -202,8 +202,7 @@ Usage: git pulls update
   def configure
     Octokit.configure do |config|
       config.login = github_login
-      config.token = github_token
-      config.endpoint = github_endpoint
+      config.web_endpoint = github_endpoint
     end
   end
 
