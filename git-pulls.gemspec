@@ -1,13 +1,13 @@
 $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
-  s.name     = "git-pulls"
+  s.name     = "git-pulls-updated"
   s.version  = "0.3.5"
   s.date     = Time.now.strftime('%Y-%m-%d')
   s.summary  = "facilitates github pull requests"
-  s.homepage = "http://github.com/schacon/git-pulls"
-  s.email    = "schacon@gmail.com"
-  s.authors  = ["Scott Chacon"]
+  s.homepage = "http://github.com/adriengiboire/git-pulls"
+  s.email    = "adrien.giboire@gmail.com"
+  s.authors  = ["Adrien Giboire"]
 
   s.files    = %w( LICENSE )
   s.files    += Dir.glob("lib/**/*")
