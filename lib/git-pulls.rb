@@ -207,9 +207,10 @@ Usage: git pulls update
 
   def configure
     Octokit.configure do |config|
-      config.login = github_login
+      config.login        = github_login
       config.web_endpoint = github_endpoint
-      config.oauth_token = github_token if github_token
+      config.oauth_token  = github_token if github_token
+      config.proxy        = github_proxy if github_proxy
     end
   end
 
@@ -228,6 +229,10 @@ Usage: git pulls update
     else
       'https://github.com'
     end
+  end
+
+  def github_proxy
+    git("config --get-all http.proxy")
   end
 
   # API/DATA HELPER FUNCTIONS #
