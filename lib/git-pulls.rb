@@ -135,7 +135,7 @@ Usage: git pulls update
       line << l(Date.parse(pull['created_at']).strftime("%m/%d"), 5)
       line << l(pull['comments'], 2)
       line << l(pull['title'], 35)
-      line << l(pull['head']['label'], 20)
+      line << l(pull['head']['label'], 50)
       sha = pull['head']['sha']
       if not_merged?(sha)
         puts line.join ' '
