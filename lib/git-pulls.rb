@@ -207,10 +207,10 @@ Usage: git pulls update
 
   def configure
     Octokit.configure do |config|
-      config.login        = github_login
+      config.login        = github_login if github_login and not github_login.empty?
       config.web_endpoint = github_endpoint
-      config.oauth_token  = github_token if github_token
-      config.proxy        = github_proxy if github_proxy
+      config.oauth_token  = github_token if github_token and not github_token.empty?
+      config.proxy        = github_proxy if github_proxy and not github_proxy.empty?
     end
   end
 
