@@ -1,4 +1,5 @@
 require 'json'
+require 'date'
 require 'launchy'
 require 'octokit'
 
