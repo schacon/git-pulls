@@ -1,4 +1,5 @@
 require 'json'
+require 'date'
 require 'launchy'
 require 'octokit'
 
@@ -134,7 +135,7 @@ Usage: git pulls update
       line << l(Date.parse(pull['created_at']).strftime("%m/%d"), 5)
       line << l(pull['comments'], 2)
       line << l(pull['title'], 35)
-      line << l(pull['head']['label'], 20)
+      line << l(pull['head']['label'], 50)
       sha = pull['head']['sha']
       if not_merged?(sha)
         puts line.join ' '
@@ -203,6 +204,7 @@ Usage: git pulls update
     Octokit.configure do |config|
       config.login = github_login
       config.web_endpoint = github_endpoint
+      config.oauth_token = github_token if github_token
     end
   end
 
