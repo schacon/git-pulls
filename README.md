@@ -9,11 +9,11 @@ Makes it easy to list and merge GitHub pull requests.
     $ git pulls list
     Open Pull Requests for schacon/git-reference
     19   10/26 0  Fix tag book link    ComputerDruid:fix-ta
-    18   10/21 0  Some typos fixing.   mashingan:master    
-    
+    18   10/21 0  Some typos fixing.   mashingan:master
+
     $ git pulls list --reverse
     Open Pull Requests for schacon/git-reference
-    18   10/21 0  Some typos fixing.   mashingan:master    
+    18   10/21 0  Some typos fixing.   mashingan:master
     19   10/26 0  Fix tag book link    ComputerDruid:fix-ta
 
     $ git pulls show 1
@@ -29,22 +29,22 @@ Makes it easy to list and merge GitHub pull requests.
 
     $ git pulls merge 1
     > merge pull request #1
-    
+
 Requirements
 ------------
 
-`git-pulls` assumes you're using an 'origin' remote.  If you are not, simply add an 'origin' 
+`git-pulls` assumes you're using an 'origin' remote.  If you are not, simply add an 'origin'
 remote that points to the GitHub repository you want to check for pull requests.
 
 Private repositories
 --------------------
 
-To manage pull requests for your private repositories you have set up your git config for github 
+To manage pull requests for your private repositories you have set up your git config for github
 
     $ git config --global github.user your_gitubusername
     $ git config --global github.token your_githubtoken123456789
-    
-You can find your API token on the [account](https://github.com/account) page.
+
+You must generate your OAuth token for command line use, see how to [generate oauth token](https://help.github.com/articles/creating-an-oauth-token-for-command-line-use).
 
 Using git-pulls with GitHub Enterprise
 --------------------------------------
