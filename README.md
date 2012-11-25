@@ -16,6 +16,11 @@ Makes it easy to list and merge GitHub pull requests.
     18   10/21 0  Some typos fixing.   mashingan:master
     19   10/26 0  Fix tag book link    ComputerDruid:fix-ta
 
+    $ git pulls checkout
+    Checking out all open pull requests for schacon/git-reference
+    > feature-request-1 into pull-feature-request-1
+    > feature/request2 into pull-feature/request2
+
     $ git pulls show 1
     > [summary]
     > [diffstat]

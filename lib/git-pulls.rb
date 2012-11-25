@@ -37,7 +37,7 @@ class GitPulls
 
   def help
     puts "No command: #{@command}"
-    puts "Try: update, list, show, merge, browse"
+    puts "Try: update, list, show, merge, checkout, browse"
     puts "or call with '-h' for usage information"
   end
 
@@ -48,6 +48,7 @@ Usage: git pulls update
    or: git pulls show <number> [--full]
    or: git pulls browse <number>
    or: git pulls merge <number>
+   or: git pulls checkout [--force]
     USAGE
   end
 
@@ -125,9 +126,11 @@ Usage: git pulls update
 
   def list
     option = @args.shift
+
     puts "Open Pull Requests for #{@user}/#{@repo}"
     pulls = get_pull_info
     pulls.reverse! if option == '--reverse'
+
     count = 0
     pulls.each do |pull|
       line = []
@@ -144,6 +147,16 @@ Usage: git pulls update
     end
     if count == 0
       puts ' -- no open pull requests --'
+    end
+  end
+
+  def checkout
+    puts "Checking out all open pull requests for #{@user}/#{@repo}"
+    pulls = get_pull_info
+    pulls.each do |pull|
+      branch_ref = pull['head']['ref']
+      puts "> #{branch_ref} into pull-#{branch_ref}"
+      git("branch --track #{@args.join(' ')} pull-#{branch_ref} origin/#{branch_ref}")
     end
   end
 
