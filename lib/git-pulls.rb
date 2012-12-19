@@ -5,7 +5,8 @@ require 'octokit'
 
 class GitPulls
 
-  PULLS_CACHE_FILE = '.git/pulls_cache.json'
+  GIT_PATH = lambda { return `git rev-parse --git-dir`.chomp }
+  PULLS_CACHE_FILE = "#{GIT_PATH.call}/pulls_cache.json"
 
   def initialize(args)
     @command = args.shift
