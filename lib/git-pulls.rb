@@ -20,7 +20,9 @@ class GitPulls
 
   def run
     configure
-    if @command && self.respond_to?(@command)
+    if not @user
+      not_a_github_repository
+    elsif @command && self.respond_to?(@command)
       # If the cache file doesn't exist, make sure we run update
       # before any other command. git-pulls will otherwise crash
       # with an exception.
@@ -40,6 +42,10 @@ class GitPulls
     puts "No command: #{@command}"
     puts "Try: update, list, show, merge, checkout, browse"
     puts "or call with '-h' for usage information"
+  end
+
+  def not_a_github_repository
+    puts "No user informations found. Make sure you're in a Github's repository."
   end
 
   def usage
@@ -284,7 +290,8 @@ Usage: git pulls update
 
   def github_insteadof_matching(c, u)
     first = c.collect {|k,v| [v, /url\.(.*github\.com.*)\.insteadof/.match(k)]}.
-              find {|v,m| u.index(v) and m != nil}
+              find {|v,m| v and u.index(v) and m != nil}
+
     if first
       return first[0], first[1][1]
     end
