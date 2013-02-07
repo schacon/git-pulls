@@ -51,7 +51,7 @@ class GitPulls
   def usage
     puts <<-USAGE
 Usage: git pulls update
-   or: git pulls list [--reverse]
+   or: git pulls list [state] [--reverse]
    or: git pulls show <number> [--full]
    or: git pulls browse <number>
    or: git pulls merge <number>
@@ -132,10 +132,17 @@ Usage: git pulls update
   end
 
   def list
-    option = @args.shift
+    state = @args.shift
 
-    puts "Open Pull Requests for #{@user}/#{@repo}"
-    pulls = get_pull_info
+    if not ['open', 'closed'].include?(state)
+      state = 'open'
+      option = state
+    else
+      option = @args.shift
+    end
+
+    puts state.capitalize + " Pull Requests for #{@user}/#{@repo}"
+    pulls = state == 'open' ? get_open_pull_info : get_closed_pull_info
     pulls.reverse! if option == '--reverse'
 
     count = 0
@@ -153,13 +160,13 @@ Usage: git pulls update
       end
     end
     if count == 0
-      puts ' -- no open pull requests --'
+      puts ' -- no ' + state + ' pull requests --'
     end
   end
 
   def checkout
     puts "Checking out all open pull requests for #{@user}/#{@repo}"
-    pulls = get_pull_info
+    pulls = get_open_pull_info
     pulls.each do |pull|
       branch_ref = pull['head']['ref']
       puts "> #{branch_ref} into pull-#{branch_ref}"
@@ -176,7 +183,7 @@ Usage: git pulls update
 
   def fetch_stale_forks
     puts "Checking for forks in need of fetching"
-    pulls = get_pull_info
+    pulls = get_open_pull_info | get_closed_pull_info
     repos = {}
     pulls.each do |pull|
       next if pull['head']['repository'].nil? # Fork has been deleted
@@ -264,8 +271,12 @@ Usage: git pulls update
     true
   end
 
-  def get_pull_info
-    get_data(PULLS_CACHE_FILE)['pulls']
+  def get_closed_pull_info
+    get_data(PULLS_CACHE_FILE)['closed']
+  end
+
+  def get_open_pull_info
+    get_data(PULLS_CACHE_FILE)['open']
   end
 
   def get_data(file)
@@ -273,8 +284,9 @@ Usage: git pulls update
   end
 
   def cache_pull_info
-    response = Octokit.pull_requests("#{@user}/#{@repo}")
-    save_data({'pulls' => response}, PULLS_CACHE_FILE)
+    response_o = Octokit.pull_requests("#{@user}/#{@repo}")
+    response_c = Octokit.pull_requests("#{@user}/#{@repo}", 'closed')
+    save_data({'open' => response_o, 'closed' => response_c}, PULLS_CACHE_FILE)
   end
 
   def save_data(data, file)
@@ -284,8 +296,9 @@ Usage: git pulls update
   end
 
   def pull_num(num)
-    data = get_pull_info
-    data.select { |p| p['number'].to_s == num.to_s }.first
+    pull = get_open_pull_info.select { |p| p['number'].to_s == num.to_s }.first
+    pull ||= get_closed_pull_info.select { |p| p['number'].to_s == num.to_s }.first
+    pull
   end
 
   def github_insteadof_matching(c, u)
