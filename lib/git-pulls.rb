@@ -52,7 +52,7 @@ class GitPulls
     puts <<-USAGE
 Usage: git pulls update
    or: git pulls list [state] [--reverse]
-   or: git pulls show <number> [--full]
+   or: git pulls show <number> [--comments] [--full]
    or: git pulls browse <number>
    or: git pulls merge <number>
    or: git pulls checkout [--force]
@@ -96,22 +96,38 @@ Usage: git pulls update
 
   def show
     num = @args.shift
-    option = @args.shift
+    optiona = @args.shift
+    optionb = @args.shift
     if p = pull_num(num)
+      comments = []
+      if optiona == '--comments' || optionb == '--comments'
+        i_comments = Octokit.issue_comments("#{@user}/#{@repo}", num)
+        p_comments = Octokit.pull_request_comments("#{@user}/#{@repo}", num)
+        c_comments = Octokit.commit_comments(p['head']['repo']['full_name'], p['head']['sha'])
+        comments = (i_comments | p_comments | c_comments).sort_by {|i| i['created_at']}
+      end
       puts "Number   : #{p['number']}"
       puts "Label    : #{p['head']['label']}"
+      puts "Creator  : #{p['user']['login']}"
       puts "Created  : #{p['created_at']}"
-      puts "Votes    : #{p['votes']}"
-      puts "Comments : #{p['comments']}"
       puts
       puts "Title    : #{p['title']}"
-      puts "Body     :"
       puts
       puts p['body']
       puts
       puts '------------'
       puts
-      if option == '--full'
+      comments.each do |c|
+        puts "Comment  : #{c['user']['login']}"
+        puts "Created  : #{c['created_at']}"
+        puts "File     : #{c['path']}:L#{c['line'] || c['position'] || c['original_position']}" unless c['path'].nil?
+        puts
+        puts c['body']
+        puts
+        puts '------------'
+        puts
+      end
+      if optiona == '--full' || optionb == '--full'
         exec "git diff --color=always HEAD...#{p['head']['sha']}"
       else
         puts "cmd: git diff HEAD...#{p['head']['sha']}"
