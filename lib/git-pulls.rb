@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'json'
 require 'date'
 require 'launchy'
@@ -250,10 +251,13 @@ Usage: git pulls update
 
   def configure
     Octokit.configure do |config|
+
       config.login        = github_login if github_login and not github_login.empty?
       config.web_endpoint = github_endpoint
       config.oauth_token  = github_token if github_token and not github_token.empty?
       config.proxy        = github_proxy if github_proxy and not github_proxy.empty?
+      config.api_endpoint = github_api_endpoint if (github_api_endpoint and \
+                                                not github_api_endpoint.empty?)
     end
   end
 
@@ -272,6 +276,15 @@ Usage: git pulls update
     else
       'https://github.com'
     end
+  end
+  def github_api_endpoint
+    endpoint = git("config --get-all github.api")
+    if endpoint.size > 0
+      endpoint
+    else
+      'https://api.github.com'
+    end
+
   end
 
   def github_proxy
@@ -332,6 +345,12 @@ Usage: git pulls update
     m = /github\.com.(.*?)\/(.*)/.match(u)
     if m
       return m[1], m[2].sub(/\.git\Z/, "")
+    end
+    # that works with default github but not enterprise
+    # u is probably something like: git@github.hq.corp.lan:SomeGroup/some_repo.git
+    m = /.*?:(.*)\/(.*?)\.git/.match(u)
+    if m
+      return m[1], m[2]
     end
     return nil, nil
   end
