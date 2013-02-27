@@ -57,7 +57,8 @@ Using git-pulls with GitHub Enterprise
 If you want to use the git-pulls script with a private GitHub install, set the
 github.host config value to your internal host.
 
-    $ git config --global github.host github.mycompany.com
+    $ git config --global github.host https://github.mycompany.com
+    $ git config --global github.api https://github.mycompany.com/api/v3
 
 Installation
 ============
