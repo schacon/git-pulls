@@ -346,11 +346,19 @@ Usage: git pulls update
     if m
       return m[1], m[2].sub(/\.git\Z/, "")
     end
+
     # that works with default github but not enterprise
-    # u is probably something like: git@github.hq.corp.lan:SomeGroup/some_repo.git
-    m = /.*?:(.*)\/(.*?)\.git/.match(u)
+    return enterprise_user_and_proj(u)
+  end
+
+  def enterprise_user_and_proj(u)
+    # if git, u is probably something like: git@github.hq.corp.lan:SomeGroup/some_repo.git
+    m = /.*?:(.*)\/(.*)/.match(u) if u =~ /^git/
+
+    # if http(s), u is probably something like: https://github.hq.corp.lan/SomeGroup/some_repo.git
+    m = /https?:\/\/.*?\/(.*)\/(.*)/.match(u) if u =~ /^http/
     if m
-      return m[1], m[2]
+      return m[1], m[2].sub(/\.git\Z/, "")
     end
     return nil, nil
   end
