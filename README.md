@@ -38,8 +38,10 @@ Makes it easy to list and merge GitHub pull requests.
 Requirements
 ------------
 
-`git-pulls` assumes you're using an 'origin' remote.  If you are not, simply add an 'origin'
-remote that points to the GitHub repository you want to check for pull requests.
+`git-pulls` assumes you're using an 'origin' remote.  If you are not,
+either add an 'origin' remote that points to the GitHub repository you want to check
+for pull requests, or set the name of your remote via an environment
+variable, GIT_REMOTE.
 
 Private repositories
 --------------------
