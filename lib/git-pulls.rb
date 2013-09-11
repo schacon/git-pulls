@@ -6,6 +6,7 @@ require 'octokit'
 
 class GitPulls
 
+  GIT_REMOTE = ENV['GIT_REMOTE'] || 'origin'
   GIT_PATH = lambda { return `git rev-parse --git-dir`.chomp }
   PULLS_CACHE_FILE = "#{GIT_PATH.call}/pulls_cache.json"
 
@@ -187,7 +188,7 @@ Usage: git pulls update
     pulls.each do |pull|
       branch_ref = pull['head']['ref']
       puts "> #{branch_ref} into pull-#{branch_ref}"
-      git("branch --track #{@args.join(' ')} pull-#{branch_ref} origin/#{branch_ref}")
+      git("branch --track #{@args.join(' ')} pull-#{branch_ref} #{GIT_REMOTE}/#{branch_ref}")
     end
   end
 
@@ -370,7 +371,7 @@ Usage: git pulls update
       k, v = line.split('=')
       c[k] = v
     end
-    u = c['remote.origin.url']
+    u = c["remote.#{GIT_REMOTE}.url"]
 
     user, proj = github_user_and_proj(u)
     if !(user and proj)
