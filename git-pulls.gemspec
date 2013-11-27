@@ -18,5 +18,8 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'launchy'
-  s.add_runtime_dependency 'octokit'
+  s.add_runtime_dependency 'octokit', '~> 2.6.1'
+
+  s.add_development_dependency 'minitest'
+  s.add_development_dependency 'rake'
 end
