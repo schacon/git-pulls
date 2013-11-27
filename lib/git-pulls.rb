@@ -255,7 +255,7 @@ Usage: git pulls update
 
       config.login        = github_login if github_login and not github_login.empty?
       config.web_endpoint = github_endpoint
-      config.oauth_token  = github_token if github_token and not github_token.empty?
+      config.access_token = github_token if github_token and not github_token.empty?
       config.proxy        = github_proxy if github_proxy and not github_proxy.empty?
       config.api_endpoint = github_api_endpoint if (github_api_endpoint and \
                                                 not github_api_endpoint.empty?)
