@@ -3,12 +3,13 @@ require 'json'
 require 'date'
 require 'launchy'
 require 'octokit'
+require 'psych'
 
 class GitPulls
 
   GIT_REMOTE = ENV['GIT_REMOTE'] || 'origin'
   GIT_PATH = lambda { return `git rev-parse --git-dir`.chomp }
-  PULLS_CACHE_FILE = "#{GIT_PATH.call}/pulls_cache.json"
+  PULLS_CACHE_FILE = "#{GIT_PATH.call}/pulls_cache.yml"
 
   def initialize(args)
     @command = args.shift
@@ -64,33 +65,39 @@ Usage: git pulls update
   def merge
     num = @args.shift
     option = @args.shift
-    if p = pull_num(num)
-      if p['head']['repository']
-        o = p['head']['repository']['owner']
-        r = p['head']['repository']['name']
+    if pull = pull_num(num)
+      head = pull[:head].to_hash
+      user = pull[:user].to_hash
+
+      if repo = head[:repo] && head[:repo].to_hash
+        owner     = repo[:owner].to_hash
+        repo_name = repo[:name]
+
+        sha = head[:sha]
+
+        message = "Merge pull request ##{num} from #{owner[:login]}/#{repo_name}\n\n---\n\n"
+        message += pull[:body].gsub("'", '')
+        cmd = ''
+        if option == '--log'
+          message += "\n\n---\n\nMerge Log:\n"
+          puts cmd = "git merge --no-ff --log -m '#{message}' #{sha}"
+        else
+          puts cmd = "git merge --no-ff -m '#{message}' #{sha}"
+        end
+        exec(cmd)
+
       else # they deleted the source repo
-        o = p['head']['user']['login']
-        purl = p['patch_url']
-        puts "Sorry, #{o} deleted the source repository, git-pulls doesn't support this."
+        owner     = head[:user].to_hash[:login]
+        patch_url = "#{pull[:_links].to_hash[:html].to_hash[:href]}.patch"
+
+        puts "Sorry, #{owner} deleted the source repository, git-pulls doesn't support this."
         puts "You can manually patch your repo by running:"
         puts
-        puts "  curl #{purl} | git am"
+        puts "  curl #{patch_url} | git am"
         puts
         puts "Tell the contributor not to do this."
         return false
       end
-      s = p['head']['sha']
-
-      message = "Merge pull request ##{num} from #{o}/#{r}\n\n---\n\n"
-      message += p['body'].gsub("'", '')
-      cmd = ''
-      if option == '--log'
-        message += "\n\n---\n\nMerge Log:\n"
-        puts cmd = "git merge --no-ff --log -m '#{message}' #{s}"
-      else
-        puts cmd = "git merge --no-ff -m '#{message}' #{s}"
-      end
-      exec(cmd)
     else
       puts "No such number"
     end
@@ -100,40 +107,47 @@ Usage: git pulls update
     num = @args.shift
     optiona = @args.shift
     optionb = @args.shift
-    if p = pull_num(num)
+
+    if pull = pull_num(num)
+      head = pull[:head].to_hash
+      repo = head[:repo].to_hash
+      user = pull[:user].to_hash
+
       comments = []
       if optiona == '--comments' || optionb == '--comments'
-        i_comments = Octokit.issue_comments("#{@user}/#{@repo}", num)
-        p_comments = Octokit.pull_request_comments("#{@user}/#{@repo}", num)
-        c_comments = Octokit.commit_comments(p['head']['repo']['full_name'], p['head']['sha'])
-        comments = (i_comments | p_comments | c_comments).sort_by {|i| i['created_at']}
+        i_comments = Octokit.issue_comments("#{@user}/#{@repo}", num).map(&:to_hash)
+        p_comments = Octokit.pull_request_comments("#{@user}/#{@repo}", num).map(&:to_hash)
+        c_comments = Octokit.commit_comments(repo[:full_name], head[:sha])
+        comments = (i_comments | p_comments | c_comments).sort_by {|i| i[:created_at]}
       end
-      puts "Number   : #{p['number']}"
-      puts "Label    : #{p['head']['label']}"
-      puts "Creator  : #{p['user']['login']}"
-      puts "Created  : #{p['created_at']}"
+      puts "Number   : #{pull[:number]}"
+      puts "Label    : #{head[:label]}"
+      puts "Creator  : #{user[:login]}"
+      puts "Created  : #{pull[:created_at]}"
       puts
-      puts "Title    : #{p['title']}"
+      puts "Title    : #{pull[:title]}"
       puts
-      puts p['body']
+      puts pull[:body]
       puts
       puts '------------'
       puts
-      comments.each do |c|
-        puts "Comment  : #{c['user']['login']}"
-        puts "Created  : #{c['created_at']}"
-        puts "File     : #{c['path']}:L#{c['line'] || c['position'] || c['original_position']}" unless c['path'].nil?
+      comments.each do |comment|
+        user = comment[:user]
+
+        puts "Comment  : #{user[:login]}"
+        puts "Created  : #{comment[:created_at]}"
+        puts "File     : #{comment[:path]}:L#{comment[:line] || comment[:position] || comment[:original_position]}" unless comment[:path].nil?
         puts
-        puts c['body']
+        puts comment[:body]
         puts
         puts '------------'
         puts
       end
       if optiona == '--full' || optionb == '--full'
-        exec "git diff --color=always HEAD...#{p['head']['sha']}"
+        exec "git diff --color=always HEAD...#{head[:sha]}"
       else
-        puts "cmd: git diff HEAD...#{p['head']['sha']}"
-        puts git("diff --stat --color=always HEAD...#{p['head']['sha']}")
+        puts "cmd: git diff HEAD...#{head[:sha]}"
+        puts git("diff --stat --color=always HEAD...#{head[:sha]}")
       end
     else
       puts "No such number"
@@ -142,8 +156,8 @@ Usage: git pulls update
 
   def browse
     num = @args.shift
-    if p = pull_num(num)
-      Launchy.open(p['html_url'])
+    if pull = pull_num(num)
+      Launchy.open(pull[:_links].to_hash[:html].to_hash[:href])
     else
       puts "No such number"
     end
@@ -163,21 +177,19 @@ Usage: git pulls update
     pulls = state == 'open' ? get_open_pull_info : get_closed_pull_info
     pulls.reverse! if option == '--reverse'
 
-    count = 0
     pulls.each do |pull|
+      pull = pull.to_hash
+      head = pull[:head].to_hash
+
       line = []
-      line << l(pull['number'], 4)
-      line << l(Date.parse(pull['created_at']).strftime("%m/%d"), 5)
-      line << l(pull['comments'], 2)
-      line << l(pull['title'], 35)
-      line << l(pull['head']['label'], 50)
-      sha = pull['head']['sha']
-      if not_merged?(sha)
-        puts line.join ' '
-        count += 1
-      end
+      line << l(pull[:number], 4)
+      line << l(Date.parse(pull[:created_at].to_s).strftime("%m/%d"), 5)
+      line << l(pull[:title], 35)
+      line << l(head[:label], 50)
+
+      puts line.join ' '
     end
-    if count == 0
+    if pulls.count == 0
       puts ' -- no ' + state + ' pull requests --'
     end
   end
@@ -186,7 +198,9 @@ Usage: git pulls update
     puts "Checking out all open pull requests for #{@user}/#{@repo}"
     pulls = get_open_pull_info
     pulls.each do |pull|
-      branch_ref = pull['head']['ref']
+      head        = pull[:head].to_hash
+      branch_ref  = head[:ref]
+
       puts "> #{branch_ref} into pull-#{branch_ref}"
       git("branch --track #{@args.join(' ')} pull-#{branch_ref} #{GIT_REMOTE}/#{branch_ref}")
     end
@@ -201,15 +215,22 @@ Usage: git pulls update
 
   def fetch_stale_forks
     puts "Checking for forks in need of fetching"
+
     pulls = get_open_pull_info | get_closed_pull_info
     repos = {}
     pulls.each do |pull|
-      next if pull['head']['repository'].nil? # Fork has been deleted
-      o = pull['head']['repository']['owner']
-      r = pull['head']['repository']['name']
-      s = pull['head']['sha']
-      if !has_sha(s)
-        repo = "#{o}/#{r}"
+      head = pull[:head].to_hash
+
+      unless repo = head[:repo] && head[:repo].to_hash
+        next # Fork has been deleted
+      end
+
+      owner     = repo[:owner].to_hash
+      repo_name = repo[:name]
+      sha       = head[:sha]
+
+      unless has_sha?(sha)
+        repo        = "#{owner[:login]}/#{repo_name}"
         repos[repo] = true
       end
     end
@@ -224,7 +245,7 @@ Usage: git pulls update
     end
   end
 
-  def has_sha(sha)
+  def has_sha?(sha)
     git("show #{sha} 2>&1")
     $?.exitstatus == 0
   end
@@ -255,7 +276,7 @@ Usage: git pulls update
 
       config.login        = github_login if github_login and not github_login.empty?
       config.web_endpoint = github_endpoint
-      config.oauth_token  = github_token if github_token and not github_token.empty?
+      config.access_token = github_token if github_token and not github_token.empty?
       config.proxy        = github_proxy if github_proxy and not github_proxy.empty?
       config.api_endpoint = github_api_endpoint if (github_api_endpoint and \
                                                 not github_api_endpoint.empty?)
@@ -302,32 +323,32 @@ Usage: git pulls update
   end
 
   def get_closed_pull_info
-    get_data(PULLS_CACHE_FILE)['closed']
+    get_data(PULLS_CACHE_FILE)['closed'].map(&:to_hash)
   end
 
   def get_open_pull_info
-    get_data(PULLS_CACHE_FILE)['open']
+    get_data(PULLS_CACHE_FILE)['open'].map(&:to_hash)
   end
 
   def get_data(file)
-    data = JSON.parse(File.read(file))
+    ::Psych.load_file(file)
   end
 
   def cache_pull_info
-    response_o = Octokit.pull_requests("#{@user}/#{@repo}")
+    response_o = Octokit.pull_requests("#{@user}/#{@repo}", 'open')
     response_c = Octokit.pull_requests("#{@user}/#{@repo}", 'closed')
     save_data({'open' => response_o, 'closed' => response_c}, PULLS_CACHE_FILE)
   end
 
   def save_data(data, file)
     File.open(file, "w+") do |f|
-      f.puts data.to_json
+      f.puts Psych.dump(data)
     end
   end
 
   def pull_num(num)
-    pull = get_open_pull_info.select { |p| p['number'].to_s == num.to_s }.first
-    pull ||= get_closed_pull_info.select { |p| p['number'].to_s == num.to_s }.first
+    pull = get_open_pull_info.select { |p| p[:number].to_s == num.to_s }.first
+    pull ||= get_closed_pull_info.select { |p| p[:number].to_s == num.to_s }.first
     pull
   end
 
