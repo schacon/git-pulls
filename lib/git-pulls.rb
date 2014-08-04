@@ -175,6 +175,11 @@ Usage: git pulls update
 
     puts state.capitalize + " Pull Requests for #{@user}/#{@repo}"
     pulls = state == 'open' ? get_open_pull_info : get_closed_pull_info
+    
+    if (state == 'closed')
+       pulls.sort! { |a, b| b[:closed_at] <=> a[:closed_at] }
+    end
+    
     pulls.reverse! if option == '--reverse'
 
     pulls.each do |pull|
