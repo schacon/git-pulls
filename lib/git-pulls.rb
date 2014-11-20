@@ -76,7 +76,7 @@ Usage: git pulls update
         sha = head[:sha]
 
         message = "Merge pull request ##{num} from #{owner[:login]}/#{repo_name}\n\n---\n\n"
-        message += pull[:body].gsub("'", '')
+        message += pull[:body] ? pull[:body].gsub("'", '') : ""
         cmd = ''
         if option == '--log'
           message += "\n\n---\n\nMerge Log:\n"
