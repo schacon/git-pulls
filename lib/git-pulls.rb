@@ -57,7 +57,7 @@ Usage: git pulls update
    or: git pulls list [state] [--reverse]
    or: git pulls show <number> [--comments] [--full]
    or: git pulls browse <number>
-   or: git pulls merge <number>
+   or: git pulls merge <number> [--no-commit] [--log]
    or: git pulls checkout [--force]
     USAGE
   end
@@ -81,6 +81,9 @@ Usage: git pulls update
         if option == '--log'
           message += "\n\n---\n\nMerge Log:\n"
           puts cmd = "git merge --no-ff --log -m '#{message}' #{sha}"
+        elsif option == '--no-commit'
+          message += "\n\n---\n\nMerge with --no-commit option:\n"
+          puts cmd = "git merge --no-commit -m '#{message}' #{sha}"
         else
           puts cmd = "git merge --no-ff -m '#{message}' #{sha}"
         end
