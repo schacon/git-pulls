@@ -2,7 +2,7 @@ $LOAD_PATH.unshift 'lib'
 
 Gem::Specification.new do |s|
   s.name     = "git-pulls"
-  s.version  = "0.4.13"
+  s.version  = "0.4.14"
   s.licenses = ['MIT']
   s.date     = Time.now.strftime('%Y-%m-%d')
   s.summary  = "facilitates github pull requests"
