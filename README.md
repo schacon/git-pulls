@@ -70,6 +70,16 @@ Simply install it via Rubygems:
 
 (Prefix with `sudo` if necessary)
 
+via Docker:
+
+Use it as a container by building it first
+
+    docker build -t git-pulls .
+
+And then launch the command like this :
+
+    docker run -v `pwd`:/app -v ~/.gitconfig:/root/.gitconfig --rm -it git-pulls list
+
 ##TESTING
 
 To run the test suite use the following command :
