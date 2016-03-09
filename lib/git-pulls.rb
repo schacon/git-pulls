@@ -178,11 +178,11 @@ Usage: git pulls update
 
     puts state.capitalize + " Pull Requests for #{@user}/#{@repo}"
     pulls = state == 'open' ? get_open_pull_info : get_closed_pull_info
-    
+
     if (state == 'closed')
        pulls.sort! { |a, b| b[:closed_at] <=> a[:closed_at] }
     end
-    
+
     pulls.reverse! if option == '--reverse'
 
     pulls.each do |pull|
@@ -343,8 +343,8 @@ Usage: git pulls update
   end
 
   def cache_pull_info
-    response_o = Octokit.pull_requests("#{@user}/#{@repo}", 'open')
-    response_c = Octokit.pull_requests("#{@user}/#{@repo}", 'closed')
+    response_o = Octokit.pull_requests("#{@user}/#{@repo}", state: 'open')
+    response_c = Octokit.pull_requests("#{@user}/#{@repo}", state: 'closed')
     save_data({'open' => response_o, 'closed' => response_c}, PULLS_CACHE_FILE)
   end
 
@@ -361,8 +361,8 @@ Usage: git pulls update
   end
 
   def github_insteadof_matching(c, u)
-    first = c.collect {|k,v| [v, /url\.(.*github\.com.*)\.insteadof/.match(k)]}.
-              find {|v,m| v and u.index(v) and m != nil}
+    first = c.collect {|k,v| [v, /url\.(.*github\.com.*)\.insteadof/.match(k)]}
+             .find {|v,m| v and u.index(v) and m != nil}
 
     if first
       return first[0], first[1][1]
