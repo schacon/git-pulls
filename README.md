@@ -1,6 +1,6 @@
 #git-pulls
 
-*If you find things that hub does not andyou  would like to see implemented, ping @AdrienGiboire for consideration.*
+**If you find things that hub does not andyou  would like to see implemented, ping @AdrienGiboire for consideration.**
 
 [![Gem Version](https://badge.fury.io/rb/comma.png)](http://badge.fury.io/rb/git-pulls)
 
