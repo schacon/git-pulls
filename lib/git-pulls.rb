@@ -125,6 +125,7 @@ Usage: git pulls update
       end
       puts "Number   : #{pull[:number]}"
       puts "Label    : #{head[:label]}"
+      puts "Status   : #{pull[:state]}"
       puts "Creator  : #{user[:login]}"
       puts "Created  : #{pull[:created_at]}"
       puts
