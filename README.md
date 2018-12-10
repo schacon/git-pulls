@@ -1,4 +1,4 @@
-#git-pulls
+# git-pulls
 
 **If you find things that hub does not and you would like to see implemented, ping @AdrienGiboire for consideration.**
 
@@ -38,14 +38,14 @@ Makes it easy to list and merge GitHub pull requests.
     $ git pulls merge 1
     > merge pull request #1
 
-##Requirements
+## Requirements
 
 `git-pulls` assumes you're using an 'origin' remote.  If you are not,
 either add an 'origin' remote that points to the GitHub repository you want to check
 for pull requests, or set the name of your remote via an environment
 variable, GIT_REMOTE.
 
-##Private repositories
+## Private repositories
 
 To manage pull requests for your private repositories you have set up your git config for github
 
@@ -54,7 +54,7 @@ To manage pull requests for your private repositories you have set up your git c
 
 You must generate your OAuth token for command line use, see how to [generate oauth token](https://help.github.com/articles/creating-an-oauth-token-for-command-line-use).
 
-##Using git-pulls with GitHub Enterprise
+## Using git-pulls with GitHub Enterprise
 
 If you want to use the git-pulls script with a private GitHub install, set the
 github.host config value to your internal host.
@@ -62,7 +62,7 @@ github.host config value to your internal host.
     $ git config --global github.host https://github.mycompany.com
     $ git config --global github.api https://github.mycompany.com/api/v3
 
-##Installation
+## Installation
 
 Simply install it via Rubygems:
 
@@ -80,7 +80,7 @@ And then launch the command like this :
 
     docker run -v `pwd`:/app -v ~/.gitconfig:/root/.gitconfig --rm -it git-pulls list
 
-##TESTING
+## TESTING
 
 To run the test suite use the following command :
 
